@@ -77,3 +77,59 @@ BEGIN
 	END IF;
 END $$
 DELIMITER ;
+
+
+-- Stored Procedure para mostrar todas las ventas realizadas por un cliente especifico en un rango de fechas
+DELIMITER $$
+CREATE PROCEDURE sp_ventas_clientes_rango_fechas(
+	IN p_id_cliente INT,
+    IN p_fecha_inicial DATE,
+    IN p_fecha_final DATE
+)
+BEGIN
+	
+    -- Variable para buscar el id del cliente
+    DECLARE v_cliente_existe INT DEFAULT NULL;
+    DECLARE v_cantidad_ventas INT DEFAULT 0;
+    DECLARE v_cantidad_ventas_rango INT DEFAULT 0;
+    
+     -- Excepción de erroes
+	DECLARE EXIT HANDLER FOR SQLSTATE '42S02' # Si no se encuentra la tabla
+    BEGIN
+		SELECT 'Algo salio mal, porfavor revisa si existe la tabla' AS 'Mensaje Error';
+    END;
+    
+    -- Buscar el Id del cliente 
+    SELECT C.id_cliente INTO v_cliente_existe
+    FROM Clientes C
+    WHERE C.id_cliente = p_id_cliente;
+    
+    -- Revisar si el cliente tiene compras
+    SELECT COUNT(V.cliente_id) INTO v_cantidad_ventas
+    FROM Ventas V
+    WHERE V.cliente_id = p_id_cliente;
+    
+    IF v_cliente_existe IS NULL THEN 
+		SELECT 'El cliente ingresado no existe' AS 'Mensaje error';
+	ELSEIF v_cantidad_ventas = 0 THEN
+		SELECT 'El cliente ingresado no tiene compras' AS 'Mensaje error';
+	ELSE
+    
+		SELECT COUNT(V.id_venta) INTO v_cantidad_ventas_rango
+		FROM Ventas V
+		INNER JOIN Clientes C ON C.id_cliente = V.cliente_id
+		WHERE CAST(fecha_venta AS DATE) BETWEEN CAST(p_fecha_inicial AS DATE) AND CAST(p_fecha_final AS DATE)
+        AND V.cliente_id = p_id_cliente;
+        
+        IF v_cantidad_ventas_rango = 0 THEN
+			SELECT 'El cliente ingresado no tiene compras en ese rango de fechas' AS 'Mensaje error';
+		ELSE
+			SELECT V.id_venta, C.id_cliente, C.nombre_completo AS 'Nombre Cliente', CAST(fecha_venta AS DATE) AS 'Fecha'
+			FROM Ventas V
+			INNER JOIN Clientes C ON C.id_cliente = V.cliente_id
+			WHERE CAST(fecha_venta AS DATE) BETWEEN CAST(p_fecha_inicial AS DATE) AND CAST(p_fecha_final AS DATE)
+            AND V.cliente_id = p_id_cliente;
+		END IF;
+    END IF;
+END $$
+DELIMITER ;
