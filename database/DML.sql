@@ -233,7 +233,7 @@ INSERT INTO Areas (nombre_area) VALUES
     ('Logistica'),
     ('Gerencia');
 
-INSERT INTO Empleados (nombre_compelto, fecha_contratacion, area_id) VALUES
+INSERT INTO Empleados (nombre_completo, fecha_contratacion, area_id) VALUES
     ('Ana Martinez', '2022-01-10', 1),
     ('Carlos Rodriguez', '2022-03-15', 2),
     ('Paula Sanchez', '2022-06-20', 3),
