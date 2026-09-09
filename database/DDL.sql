@@ -184,7 +184,7 @@ CREATE TABLE Areas(
 
 CREATE TABLE Empleados(
 	id_empleado INT AUTO_INCREMENT,
-    nombre_compelto VARCHAR(100) NOT NULL,
+    nombre_completo VARCHAR(100) NOT NULL,
     fecha_contratacion DATE NOT NULL,
     area_id INT NOT NULL,
     PRIMARY KEY (id_empleado),
