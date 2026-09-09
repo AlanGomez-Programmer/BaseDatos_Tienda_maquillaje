@@ -106,7 +106,7 @@ CREATE TABLE Materiales(
  
  CREATE TABLE Tamanios(
 	id_tamanio INT AUTO_INCREMENT,
-    tamanio DECIMAL(3, 2) NOT NULL,
+    tamanio DECIMAL(5, 2) NOT NULL,
     unidad_medida_id INT NOT NULL,
     PRIMARY KEY (id_tamanio),
     FOREIGN KEY (unidad_medida_id) REFERENCES Unidades_medidas(id_unidad_medida)
@@ -138,7 +138,7 @@ CREATE TABLE Perfumes(
     tamanio_id INT NOT NULL,
     PRIMARY KEY (id_perfume),
     FOREIGN KEY (producto_id) REFERENCES Productos(id_producto),
-    FOREIGN KEY (producto_id) REFERENCES Tipos_Aromas(id_tipo_aroma),
+    FOREIGN KEY (tipo_aroma_id) REFERENCES Tipos_Aromas(id_tipo_aroma),
     FOREIGN KEY (tamanio_id) REFERENCES Tamanios(id_tamanio)
 );
 
