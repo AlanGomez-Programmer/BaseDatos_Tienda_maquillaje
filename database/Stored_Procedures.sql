@@ -42,3 +42,38 @@ BEGIN
 	END IF;
 END $$
 DELIMITER ;
+
+
+-- Stored Procedure para obtener todos los productos en una categoría en específica cuyo stock sea inferior a un valor dado
+DELIMITER $$
+CREATE PROCEDURE sp_productos_categoria_stockInferior(
+	IN p_id_categoria INT,
+    IN p_stock INT
+)
+BEGIN
+	-- Variable de id categoría existente
+    DECLARE v_id_categoria_encontrada INT DEFAULT NULL;
+    
+    -- Excepción de erroes
+	DECLARE EXIT HANDLER FOR SQLSTATE '42S02' # Si no se encuentra la tabla
+    BEGIN
+		SELECT 'Algo salio mal, porfavor revisa si existe la tabla' AS 'Mensaje Error';
+    END;
+    
+    -- Buscar el id de la categoría
+    SELECT C.id_categoria INTO v_id_categoria_encontrada
+    FROM Categorias C
+    WHERE C.id_categoria = p_id_categoria;
+    
+    IF p_stock <= 0 THEN
+		SELECT 'No se aceptan valores menores a 0' AS 'Mensaje Error';
+	ELSEIF v_id_categoria_encontrada IS NULL THEN
+		SELECT 'No existen productos con el ID de la categoría que ingreso' AS 'Mensaje error';
+	ELSE
+		SELECT P.id_producto, P.nombre AS 'Nombre del producto', C.categoria 'Categoría', P.stock AS 'Stock'
+        FROM Productos P
+        INNER JOIN Categorias C ON C.id_categoria = P.categoria_id
+        WHERE P.stock < p_stock AND P.categoria_id = p_id_categoria;
+	END IF;
+END $$
+DELIMITER ;
