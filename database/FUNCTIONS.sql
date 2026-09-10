@@ -54,3 +54,22 @@ BEGIN
     RETURN cliente_existe;
 END $$
 DELIMITER; 
+
+-- Función para calcular la cantidad de compras realizadas por el cliente que se ingresa
+DELIMITER $$
+CREATE FUNCTION fn_cantidad_compras_cliente(p_id_cliente INT)
+RETURNS INT
+DETERMINISTIC
+READS SQL DATA
+BEGIN
+	-- Variable para tener la cantidad de compras
+    DECLARE cantidad_ventas INT DEFAULT 0;
+    
+	-- Obtener la cantidad de compras
+	SELECT COUNT(V.cliente_id) INTO cantidad_ventas
+    FROM Ventas V
+    WHERE V.cliente_id = p_id_cliente;
+    
+    RETURN cantidad_ventas;
+END $$
+DELIMITER; 
