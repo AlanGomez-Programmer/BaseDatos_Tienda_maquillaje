@@ -193,3 +193,49 @@ BEGIN
     END IF;
 END $$
 DELIMITER ;
+
+-- Stored Procedure para consultar el stock disponible de un producto por su nombre o identificador
+DELIMITER $$
+CREATE PROCEDURE sp_consultar_stock_producto(
+    IN p_id_producto INT,
+    IN p_nombre_producto VARCHAR(100)
+)
+BEGIN
+    -- Declarar las variables
+    DECLARE v_existe_producto_id INT DEFAULT NULL;
+    DECLARE v_cantidad_producto_nombre INT DEFAULT 0;
+
+    -- Excepción de errores
+    DECLARE EXIT HANDLER FOR SQLSTATE '42S02'
+    BEGIN
+        SELECT 'Algo salio mal, porfavor revisa si existe la tabla' AS 'Mensaje Error';
+    END;
+
+    IF p_id_producto IS NULL AND p_nombre_producto IS NULL THEN
+        SELECT 'Debe ingresar un ID o un nombre de producto' AS 'Mensaje Error';
+    ELSE
+        -- Usar la funcion correspondiente segun el parametro que venga
+        IF p_id_producto IS NOT NULL THEN
+            SET v_existe_producto_id = fn_existencia_producto_id(p_id_producto);
+        END IF;
+
+        IF p_nombre_producto IS NOT NULL THEN
+            SET v_cantidad_producto_nombre = fn_existencia_producto_nombre(p_nombre_producto);
+        END IF;
+
+        IF p_id_producto IS NOT NULL AND v_existe_producto_id IS NULL THEN
+            SELECT 'No existe ningun producto con ese ID' AS 'Mensaje Error';
+        ELSEIF p_nombre_producto IS NOT NULL AND v_cantidad_producto_nombre = 0 THEN
+            SELECT 'No existe ningun producto con ese nombre' AS 'Mensaje Error';
+        ELSE
+            SELECT 
+                id_producto AS 'ID Producto', 
+                nombre AS 'Nombre del producto', 
+                stock AS 'Stock disponible'
+            FROM Productos
+            WHERE (p_id_producto IS NOT NULL AND id_producto = p_id_producto)
+               OR (p_nombre_producto IS NOT NULL AND nombre LIKE CONCAT('%', p_nombre_producto, '%'));
+        END IF;
+    END IF;
+END $$
+DELIMITER ;
