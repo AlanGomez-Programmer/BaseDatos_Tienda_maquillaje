@@ -99,3 +99,22 @@ BEGIN
 	RETURN cantidad_ventas_rango;
 END $$
 DELIMITER ;
+
+-- Función para calcular la existencia del empleado ingresado
+DELIMITER $$
+CREATE FUNCTION fn_existencia_empleado(p_id_empleado INT)
+RETURNS INT
+DETERMINISTIC 
+READS SQL DATA
+BEGIN
+	-- Declaramos la variable para obtener el id del empleado
+    DECLARE existe_empleado INT DEFAULT NULL;
+    
+    -- Buscar el id del empleado y almacenarlo en la variable
+    SELECT E.id_empleado INTO existe_empleado
+    FROM Empleados E
+    WHERE E.id_empleado = p_id_empleado;
+    
+    RETURN existe_empleado;
+END $$
+DELIMITER ;
