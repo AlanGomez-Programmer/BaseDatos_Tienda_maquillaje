@@ -35,3 +35,22 @@ BEGIN
     RETURN id_categoria_encontrada;
 END $$
 DELIMITER ;
+
+-- Función para verificar la existencia del cliente ingresado
+ DELIMITER $$
+CREATE FUNCTION fn_existencia_cliente(p_id_cliente INT)
+RETURNS INT
+DETERMINISTIC
+READS SQL DATA
+BEGIN
+	-- Variable para buscar el id del cliente
+    DECLARE cliente_existe INT DEFAULT NULL;
+    
+	-- Buscar el Id del cliente 
+	SELECT C.id_cliente INTO cliente_existe
+    FROM Clientes C
+    WHERE C.id_cliente = p_id_cliente;
+    
+    RETURN cliente_existe;
+END $$
+DELIMITER; 
