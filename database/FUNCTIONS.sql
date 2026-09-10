@@ -144,3 +144,21 @@ BEGIN
 END $$
 DELIMITER ;
 
+-- Función para verificar si existe un producto por su ID
+DELIMITER $$
+CREATE FUNCTION fn_existencia_producto_id(p_id_producto INT)
+RETURNS INT
+DETERMINISTIC
+READS SQL DATA
+BEGIN
+    -- Declaramos la variable para obtener el id del producto
+    DECLARE existe_producto INT DEFAULT NULL;
+
+    -- Buscar el id del producto y almacenarlo en la variable
+    SELECT P.id_producto INTO existe_producto
+    FROM Productos P
+    WHERE P.id_producto = p_id_producto;
+
+    RETURN existe_producto;
+END $$
+DELIMITER ;
