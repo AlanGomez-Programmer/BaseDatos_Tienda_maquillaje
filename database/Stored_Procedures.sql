@@ -239,3 +239,53 @@ BEGIN
     END IF;
 END $$
 DELIMITER ;
+
+-- Stored Procedure para mostrar las ordenes de compra realizadas a un proveedor en el ultimo año. 
+DELIMITER $$
+CREATE PROCEDURE sp_ordenes_compra_proveedor_ultimo_anio(
+    IN p_id_proveedor INT
+)
+BEGIN
+    -- Declarar las variables
+    DECLARE v_existe_proveedor INT DEFAULT NULL;
+    DECLARE v_cantidad_ordenes INT DEFAULT 0;
+
+    -- Excepción de errores
+    DECLARE EXIT HANDLER FOR SQLSTATE '42S02'
+    BEGIN
+        SELECT 'Algo salio mal, porfavor revisa si existe la tabla' AS 'Mensaje Error';
+    END;
+
+    -- Validar que el id no sea negativo o cero
+    IF p_id_proveedor <= 0 THEN
+        SELECT 'No se aceptan valores menores o iguales a 0' AS 'Mensaje Error';
+    ELSE
+        -- Usar la funcion para verificar si el proveedor existe
+        SET v_existe_proveedor = fn_existencia_proveedor(p_id_proveedor);
+
+        IF v_existe_proveedor IS NULL THEN
+            SELECT 'El proveedor ingresado no existe' AS 'Mensaje Error';
+        ELSE
+            -- Contar cuantas ordenes tiene ese proveedor en el ultimo anio
+            SELECT COUNT(*) INTO v_cantidad_ordenes
+            FROM Ordenes_Compras OC
+            WHERE OC.proveedor_id = p_id_proveedor
+              AND OC.fecha_orden >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR);
+
+            IF v_cantidad_ordenes = 0 THEN
+                SELECT 'El proveedor no tiene ordenes de compra en el ultimo anio' AS 'Mensaje Error';
+            ELSE
+                SELECT 
+                    OC.id_orden_compra AS 'ID Orden', 
+                    P.nombre_empresa AS 'Proveedor', 
+                    OC.fecha_orden AS 'Fecha de Orden'
+                FROM Ordenes_Compras OC
+                INNER JOIN Proveedores P ON P.id_proveedor = OC.proveedor_id
+                WHERE OC.proveedor_id = p_id_proveedor
+                  AND OC.fecha_orden >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
+                ORDER BY OC.fecha_orden DESC;
+            END IF;
+        END IF;
+    END IF;
+END $$
+DELIMITER ;
