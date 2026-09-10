@@ -73,3 +73,29 @@ BEGIN
     RETURN cantidad_ventas;
 END $$
 DELIMITER; 
+
+-- Función para calcular la cantidad de ventas a un cliente en un rango
+-- de fechas ingresadas
+DELIMITER $$
+CREATE FUNCTION fn_cantidad_ventas_cliente(
+	p_id_cliente INT,
+    p_fecha_inicial DATE,
+    p_fecha_final DATE
+)
+RETURNS INT
+DETERMINISTIC
+READS SQL DATA
+BEGIN
+
+	-- Variable para la cantidad de ventas en el rango determinado
+	DECLARE cantidad_ventas_rango INT DEFAULT 0;
+      
+	SELECT COUNT(V.id_venta) INTO cantidad_ventas_rango
+	FROM Ventas V
+	INNER JOIN Clientes C ON C.id_cliente = V.cliente_id
+	WHERE CAST(fecha_venta AS DATE) BETWEEN CAST(p_fecha_inicial AS DATE) AND CAST(p_fecha_final AS DATE)
+	AND V.cliente_id = p_id_cliente;
+        
+	RETURN cantidad_ventas_rango;
+END $$
+DELIMITER ;
