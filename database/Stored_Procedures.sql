@@ -1,3 +1,6 @@
+-- Poner en uso la base de datos
+USE Tienda_maquillaje;
+
 -- Stored Procedure para consulta de productos de un tipo de cosmetico en especifico
 DELIMITER $$
 CREATE PROCEDURE sp_consulta_cosmetico_tipo_especifico(
