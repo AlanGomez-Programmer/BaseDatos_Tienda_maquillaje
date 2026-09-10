@@ -14,10 +14,8 @@ BEGIN
 		SELECT 'Algo salio mal, porfavor revisa si existe la tabla' AS 'Mensaje Error';
     END;
    
-   -- Buscar si el tipo de cosmetico existe
-	SELECT TC.tipo_cosmetico INTO cosmetico_encontrado
-	FROM Tipos_cosmeticos TC
-	WHERE TC.tipo_cosmetico = p_tipo_cosmetico;
+    -- Buscar si el tipo de cosmetico existe
+    SET cosmetico_encontrado = fn_existencia_tipo_cosmetico(p_tipo_cosmetico);
     
     -- Contar la cantidad de productos
     SELECT COUNT(P.id_producto) INTO cantidad_de_producto
@@ -43,7 +41,6 @@ BEGIN
 END $$
 DELIMITER ;
 
-
 -- Stored Procedure para obtener todos los productos en una categoría en específica cuyo stock sea inferior a un valor dado
 DELIMITER $$
 CREATE PROCEDURE sp_productos_categoria_stockInferior(
@@ -61,9 +58,7 @@ BEGIN
     END;
     
     -- Buscar el id de la categoría
-    SELECT C.id_categoria INTO v_id_categoria_encontrada
-    FROM Categorias C
-    WHERE C.id_categoria = p_id_categoria;
+	SET v_id_categoria_encontrada = fn_existencia_categoria(p_id_categoria);
     
     IF p_stock <= 0 THEN
 		SELECT 'No se aceptan valores menores a 0' AS 'Mensaje Error';
@@ -100,26 +95,18 @@ BEGIN
     END;
     
     -- Buscar el Id del cliente 
-    SELECT C.id_cliente INTO v_cliente_existe
-    FROM Clientes C
-    WHERE C.id_cliente = p_id_cliente;
+   SET v_cliente_existe = fn_existencia_cliente(p_id_cliente);
     
     -- Revisar si el cliente tiene compras
-    SELECT COUNT(V.cliente_id) INTO v_cantidad_ventas
-    FROM Ventas V
-    WHERE V.cliente_id = p_id_cliente;
+    SET v_cantidad_ventas = fn_cantidad_compras_cliente(p_id_cliente);
     
     IF v_cliente_existe IS NULL THEN 
 		SELECT 'El cliente ingresado no existe' AS 'Mensaje error';
 	ELSEIF v_cantidad_ventas = 0 THEN
 		SELECT 'El cliente ingresado no tiene compras' AS 'Mensaje error';
 	ELSE
-    
-		SELECT COUNT(V.id_venta) INTO v_cantidad_ventas_rango
-		FROM Ventas V
-		INNER JOIN Clientes C ON C.id_cliente = V.cliente_id
-		WHERE CAST(fecha_venta AS DATE) BETWEEN CAST(p_fecha_inicial AS DATE) AND CAST(p_fecha_final AS DATE)
-        AND V.cliente_id = p_id_cliente;
+		
+        SET v_cantidad_ventas_rango = fn_cantidad_ventas_cliente(p_id_cliente, p_fecha_inicial, p_fecha_final);
         
         IF v_cantidad_ventas_rango = 0 THEN
 			SELECT 'El cliente ingresado no tiene compras en ese rango de fechas' AS 'Mensaje error';
