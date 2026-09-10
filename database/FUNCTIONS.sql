@@ -162,3 +162,22 @@ BEGIN
     RETURN existe_producto;
 END $$
 DELIMITER ;
+
+-- Función para verificar cuántos productos coinciden con un nombre
+DELIMITER $$
+CREATE FUNCTION fn_existencia_producto_nombre(p_nombre_producto VARCHAR(100))
+RETURNS INT
+DETERMINISTIC
+READS SQL DATA
+BEGIN
+    -- Declaramos la variable para contar coincidencias
+    DECLARE cantidad_encontrada INT DEFAULT 0;
+
+    -- Contar cuantos productos coinciden con el nombre ingresado
+    SELECT COUNT(*) INTO cantidad_encontrada
+    FROM Productos P
+    WHERE P.nombre LIKE CONCAT('%', p_nombre_producto, '%');
+
+    RETURN cantidad_encontrada;
+END $$
+DELIMITER ;
