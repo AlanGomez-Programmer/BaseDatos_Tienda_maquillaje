@@ -163,3 +163,33 @@ BEGIN
 	END IF;
 END $$
 DELIMITER ;
+
+-- Stored Procedure para listar los productos más vendidos en un período determinado
+DELIMITER $$
+CREATE PROCEDURE sp_productos_mas_vendidos_periodo(
+    IN p_fecha_inicial DATE,
+    IN p_fecha_final DATE
+)
+BEGIN
+    -- Excepción de errores
+    DECLARE EXIT HANDLER FOR SQLSTATE '42S02'
+    BEGIN
+        SELECT 'Algo salio mal, porfavor revisa si existe la tabla' AS 'Mensaje Error';
+    END;
+
+    IF p_fecha_inicial > p_fecha_final THEN
+        SELECT 'La fecha inicial no puede ser mayor a la fecha final' AS 'Mensaje Error';
+    ELSE
+        SELECT 
+            P.id_producto, 
+            P.nombre AS 'Nombre del producto', 
+            SUM(D.cantidad_producto) AS 'Cantidad Vendida'
+        FROM Detalle_Venta_Productos D
+        INNER JOIN Ventas V ON V.id_venta = D.ventas_id
+        INNER JOIN Productos P ON P.id_producto = D.producto_id
+        WHERE CAST(V.fecha_venta AS DATE) BETWEEN p_fecha_inicial AND p_fecha_final
+        GROUP BY P.id_producto, P.nombre
+        ORDER BY SUM(D.cantidad_producto) DESC;
+    END IF;
+END $$
+DELIMITER ;
