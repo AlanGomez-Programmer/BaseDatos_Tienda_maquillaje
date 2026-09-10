@@ -200,3 +200,55 @@ BEGIN
     RETURN existe_proveedor;
 END $$
 DELIMITER ;
+
+-- Stored Procedure para consultar las ventas de un producto especifico por id y cuantas unidades se vendieron
+DELIMITER $$
+CREATE PROCEDURE sp_ventas_producto_por_id(
+    IN p_id_producto INT
+)
+BEGIN
+    -- Declarar las variables
+    DECLARE v_existe_producto INT DEFAULT NULL;
+    DECLARE v_cantidad_registros INT DEFAULT 0;
+
+    -- Excepción de errores
+    DECLARE EXIT HANDLER FOR SQLSTATE '42S02'
+    BEGIN
+        SELECT 'Algo salio mal, porfavor revisa si existe la tabla' AS 'Mensaje Error';
+    END;
+
+    -- Validar que el id no sea negativo o cero
+    IF p_id_producto <= 0 THEN
+        SELECT 'No se aceptan valores menores o iguales a 0' AS 'Mensaje Error';
+    ELSE
+        -- Usar la funcion para verificar si el producto existe
+        SET v_existe_producto = fn_existencia_producto_id(p_id_producto);
+
+        IF v_existe_producto IS NULL THEN
+            SELECT 'El producto ingresado no existe' AS 'Mensaje Error';
+        ELSE
+            -- Contar cuantos registros de venta tiene ese producto
+            SELECT COUNT(*) INTO v_cantidad_registros
+            FROM Detalle_Venta_Productos D
+            WHERE D.producto_id = p_id_producto;
+
+            IF v_cantidad_registros = 0 THEN
+                SELECT 'El producto ingresado no tiene ventas registradas' AS 'Mensaje Error';
+            ELSE
+                SELECT 
+                    V.id_venta AS 'ID Venta',
+                    P.nombre AS 'Nombre del Producto',
+                    CAST(V.fecha_venta AS DATE) AS 'Fecha de Venta',
+                    D.cantidad_producto AS 'Unidades Vendidas',
+                    D.precio_unitario AS 'Precio Unitario',
+                    D.subtotal AS 'Subtotal'
+                FROM Detalle_Venta_Productos D
+                INNER JOIN Ventas V ON V.id_venta = D.ventas_id
+                INNER JOIN Productos P ON P.id_producto = D.producto_id
+                WHERE D.producto_id = p_id_producto
+                ORDER BY V.fecha_venta DESC;
+            END IF;
+        END IF;
+    END IF;
+END $$
+DELIMITER ;
