@@ -118,3 +118,29 @@ BEGIN
     RETURN existe_empleado;
 END $$
 DELIMITER ;
+
+-- Función para calcular las ventas de un empleado en un mes y año en especifico
+DELIMITER $$
+CREATE FUNCTION fn_calculo_venta_empleado_mes(
+	p_id_empleado INT,
+    p_mes INT,
+    p_anio INT
+)
+RETURNS INT
+DETERMINISTIC 
+READS SQL DATA
+BEGIN
+	-- Declaramos la variable para obtener la cantidad de ventas
+    DECLARE cantidad_ventas INT DEFAULT NULL;
+    
+    -- Buscar el id del empleado y almacenarlo en la variable
+    SELECT COUNT(V.id_venta) INTO cantidad_ventas
+	FROM Ventas V
+	INNER JOIN Empleados E ON E.id_empleado = V.empleado_id
+	WHERE MONTH(V.fecha_venta) = p_mes AND YEAR(V.fecha_venta) = p_anio
+	AND V.empleado_id = p_id_empleado;
+    
+    RETURN cantidad_ventas;
+END $$
+DELIMITER ;
+
