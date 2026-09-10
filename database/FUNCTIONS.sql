@@ -1,5 +1,4 @@
 -- Función para verificar si existe el tipo de cosmético ingresado
-
 DELIMITER $$
 CREATE FUNCTION fn_existencia_tipo_cosmetico(p_tipo_cosmetico VARCHAR(50))
 RETURNS VARCHAR(50)
@@ -18,3 +17,21 @@ BEGIN
 END $$
 DELIMITER ; 
 
+-- Función para verificar la existencia de la categoría ingresada
+DELIMITER $$
+CREATE FUNCTION fn_existencia_categoria(p_id_categoria INT)
+RETURNS INT
+DETERMINISTIC
+READS SQL DATA
+BEGIN
+	-- Variable de id categoría existente
+    DECLARE id_categoria_encontrada INT DEFAULT NULL;
+    
+    -- Buscar el id de la categoría
+	SELECT C.id_categoria INTO id_categoria_encontrada
+    FROM Categorias C
+    WHERE C.id_categoria = p_id_categoria;
+    
+    RETURN id_categoria_encontrada;
+END $$
+DELIMITER ;
