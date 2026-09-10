@@ -1,3 +1,6 @@
+-- Poner en uso la base de datos
+USE Tienda_maquillaje;
+
 -- Función para verificar si existe el tipo de cosmético ingresado
 DELIMITER $$
 CREATE FUNCTION fn_existencia_tipo_cosmetico(p_tipo_cosmetico VARCHAR(50))
