@@ -181,3 +181,22 @@ BEGIN
     RETURN cantidad_encontrada;
 END $$
 DELIMITER ;
+
+-- Función para verificar si existe un proveedor por su ID
+DELIMITER $$
+CREATE FUNCTION fn_existencia_proveedor(p_id_proveedor INT)
+RETURNS INT
+DETERMINISTIC
+READS SQL DATA
+BEGIN
+    -- Declaramos la variable para obtener el id del proveedor
+    DECLARE existe_proveedor INT DEFAULT NULL;
+
+    -- Buscar el id del proveedor y almacenarlo en la variable
+    SELECT P.id_proveedor INTO existe_proveedor
+    FROM Proveedores P
+    WHERE P.id_proveedor = p_id_proveedor;
+
+    RETURN existe_proveedor;
+END $$
+DELIMITER ;
