@@ -120,3 +120,46 @@ BEGIN
     END IF;
 END $$
 DELIMITER ;
+
+-- Stored Procedure para mostrar todas las ventas realizadas por empleado especifico en un mes dado
+DELIMITER $$
+CREATE PROCEDURE sp_calcular_total_ventas_mes_empleado(
+	IN p_id_empleado INT,
+    IN p_mes INT,
+    IN p_anio INT
+)
+BEGIN
+    -- Declarar las variables
+    DECLARE existe_empleado INT DEFAULT NULL;
+    DECLARE cantidad_ventas INT DEFAULT 0;
+    
+	-- Excepción de erroes
+	DECLARE EXIT HANDLER FOR SQLSTATE '42S02' # Si no se encuentra la tabla
+    BEGIN
+		SELECT 'Algo salio mal, porfavor revisa si existe la tabla' AS 'Mensaje Error';
+    END;
+    
+    DECLARE EXIT HANDLER FOR SQLSTATE '42S22' # Si no se encuentra la tabla
+    BEGIN
+		SELECT 'Algo salio mal, porfavor revisa las tablas' AS 'Mensaje Error';
+    END;
+    
+    SET existe_empleado = fn_existencia_empleado(p_id_empleado);
+    SET cantidad_ventas = fn_calculo_venta_empleado_mes(p_id_empleado, p_mes, p_anio);
+    
+    IF p_id_empleado <= 0 OR p_mes <= 0 OR p_anio <= 0 THEN
+		SELECT 'No se aceptan valores menores a 0' AS 'Mensaje error';
+    ELSEIF existe_empleado IS NULL THEN
+		SELECT 'El empleado ingresado no existe' AS 'Mensaje error';
+	ELSEIF cantidad_ventas = 0 THEN
+		SELECT 'El empleado ingresado no tiene ventas' AS 'Mensaje error';
+    ELSE
+		SELECT V.empleado_id, E.nombre_completo, COUNT(V.id_venta) AS 'Cantidad Ventas'
+		FROM Ventas V
+		INNER JOIN Empleados E ON E.id_empleado = V.empleado_id
+		WHERE MONTH(V.fecha_venta) = p_mes AND YEAR(V.fecha_venta) = p_anio
+		AND V.empleado_id = p_id_empleado
+        GROUP BY V.empleado_id, E.nombre_completo;
+	END IF;
+END $$
+DELIMITER ;
