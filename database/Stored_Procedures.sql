@@ -322,3 +322,39 @@ BEGIN
     END IF;
 END $$
 DELIMITER ;
+
+-- Stored Procedure para obtener la cantidad total de productos vendidos en un dia especifico
+DELIMITER $$
+CREATE PROCEDURE sp_cantidad_productos_vendidos_dia(
+    IN p_fecha DATE
+)
+BEGIN
+    -- Declarar las variables
+    DECLARE v_cantidad_total INT DEFAULT 0;
+
+    -- Excepción de errores
+    DECLARE EXIT HANDLER FOR SQLSTATE '42S02'
+    BEGIN
+        SELECT 'Algo salio mal, porfavor revisa si existe la tabla' AS 'Mensaje Error';
+    END;
+
+    -- Validar que la fecha no sea nula
+    IF p_fecha IS NULL THEN
+        SELECT 'Debe ingresar una fecha valida' AS 'Mensaje Error';
+    ELSE
+        -- Sumar la cantidad de productos vendidos en esa fecha
+        SELECT SUM(D.cantidad_producto) INTO v_cantidad_total
+        FROM Detalle_Venta_Productos D
+        INNER JOIN Ventas V ON V.id_venta = D.ventas_id
+        WHERE CAST(V.fecha_venta AS DATE) = p_fecha;
+
+        IF v_cantidad_total IS NULL THEN
+            SELECT 'No se registraron ventas en la fecha ingresada' AS 'Mensaje Error';
+        ELSE
+            SELECT 
+                p_fecha AS 'Fecha', 
+                v_cantidad_total AS 'Cantidad Total de Productos Vendidos';
+        END IF;
+    END IF;
+END $$
+DELIMITER ;
