@@ -289,3 +289,36 @@ BEGIN
     END IF;
 END $$
 DELIMITER ;
+
+-- Stored Procedure para listar los empleados que han trabajado mas de un año en la tienda
+DELIMITER $$
+CREATE PROCEDURE sp_empleados_mas_un_anio()
+BEGIN
+    -- Declarar las variables
+    DECLARE v_cantidad_empleados INT DEFAULT 0;
+
+    -- Excepción de errores
+    DECLARE EXIT HANDLER FOR SQLSTATE '42S02'
+    BEGIN
+        SELECT 'Algo salio mal, porfavor revisa si existe la tabla' AS 'Mensaje Error';
+    END;
+
+    -- Contar cuantos empleados cumplen la condicion
+    SELECT COUNT(*) INTO v_cantidad_empleados
+    FROM Empleados E
+    WHERE E.fecha_contratacion <= DATE_SUB(CURDATE(), INTERVAL 1 YEAR);
+
+    IF v_cantidad_empleados = 0 THEN
+        SELECT 'No hay empleados con mas de un año trabajando en la tienda' AS 'Mensaje Error';
+    ELSE
+        SELECT 
+            E.id_empleado AS 'ID Empleado', 
+            E.nombre_completo AS 'Nombre del Empleado', 
+            E.fecha_contratacion AS 'Fecha de Contratacion',
+            TIMESTAMPDIFF(YEAR, E.fecha_contratacion, CURDATE()) AS 'Años Trabajados'
+        FROM Empleados E
+        WHERE E.fecha_contratacion <= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
+        ORDER BY E.fecha_contratacion ASC;
+    END IF;
+END $$
+DELIMITER ;
